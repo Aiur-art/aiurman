@@ -1,0 +1,12 @@
+{
+  "name": "EBAN-bot",
+  "version": "1.0.0",
+  "description": "Seriy Discord Bot",
+  "main": "bot.js",
+  "author": "Stressful Courtier",
+  "dependencies": {
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+    "monk": "^7.1.1",
+    "winston": "^3.2.1"
+  }
+}
