@@ -1,3 +1,4 @@
+require('dotenv').config(); 
 var Discord = require('discord.js');
 var logger = require('winston');
 var auth = require('./auth.json');
@@ -11,7 +12,7 @@ logger.add(new logger.transports.Console, {
 logger.level = 'debug';
 
 //Configure db connection
-var db = monk(auth.dblink);
+var db = monk(process.env.DB_LINK);
 var words = db.get('Words');
 
 // Initialize Discord Bot
@@ -77,5 +78,4 @@ bot.on('message', function (message) {
     }
 });
 
-bot.login(auth.token)
-    .then(console.log("success"));
+bot.login();
