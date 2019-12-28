@@ -1,4 +1,4 @@
-var Discord = require('discord.io');
+var Discord = require('discord.js');
 var logger = require('winston');
 var auth = require('./auth.json');
 var monk = require('monk');
@@ -15,27 +15,24 @@ var db = monk(auth.dblink);
 var words = db.get('Words');
 
 // Initialize Discord Bot
-var bot = new Discord.Client({
-    token: auth.token,
-    autorun: true
-});
+var bot = new Discord.Client();
 
 bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
-    logger.info(bot.username + ' - (' + bot.id + ')');
+    logger.info(bot.user.tag);
 });
-bot.on('message', function (user, userID, channelID, message, evt) {
+bot.on('message', function (message) {
     // Our bot needs to know if it will execute a command
     // It will listen for messages that will start with `e!`
-    if (message.substring(0, 2) == 'e!') {
-        var args = message.substring(2).split(' ');
+    if (message.content.substring(0, 2) == 'e!') {
+        var args = message.content.substring(2).split(' ');
         var cmd = args[0];
 
         args = args.splice(1);
 
         let label = args[0];
-        let text = message.substring(cmd.length + label.length + 3); //"e!".length + " ".length = 3
+        let text = message.content.substring(cmd.length + label.length + 3); //"e!".length + " ".length = 3
 
         switch (cmd) {
 
@@ -47,7 +44,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     if (err) throw err;
                     if (doc == null) logger.info(label + " - not found");
                     else {
-                        bot.sendMessage({ to: channelID, message: doc.Text });
+                        message.reply(doc.Text);
                     }
                 });
                 break;
@@ -61,8 +58,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     { $set: { Label: label, Text: text } },
                     { upsert: true },
                     function (err, object) {
-                        if (err) bot.sendMessage({ to: channelID, message: "Не понимаю" });
-                        else bot.sendMessage({ to: channelID, message: "Понимаю" });
+                        if (err) message.reply("Не понимаю");
+                        else message.reply("Понимаю");
                     });
                 break;
 
@@ -72,10 +69,13 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
                 words.remove({ Label: label },
                     function (err, object) {
-                        if (err) bot.sendMessage({ to: channelID, message: "Дело не сделано" });
-                        else bot.sendMessage({ to: channelID, message: "Дело сделано" });
+                        if (err) message.reply("Дело не сделано");
+                        else message.reply("Дело сделано");
                     });
                 break;
         }
     }
 });
+
+bot.login(auth.token)
+    .then(console.log("success"));
